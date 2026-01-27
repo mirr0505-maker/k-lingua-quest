@@ -1,72 +1,73 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from './supabaseClient';
+import Navbar from './components/Navbar';
+import { translations } from './locales/languages';
 
 function App() {
-  const [word, setWord] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [score, setScore] = useState(0);
-  const [language, setLanguage] = useState('en');
+  const [showIntro, setShowIntro] = useState(true);
+  const [currentMenu, setCurrentMenu] = useState('home');
+  const [language, setLanguage] = useState('ko');
 
-  const i18n = {
-    en: { subtitle: "GLOBAL HANGEUL MASTERY PLATFORM", start: "QUEST START", loading: "Loading..." },
-    es: { subtitle: "PLATAFORMA GLOBAL DE MAESTRÍA EN HANGEUL", start: "INICIAR QUEST", loading: "Cargando..." },
-    jp: { subtitle: "グローバル・ハングル・マスタリー・プラットフォーム", start: "クエスト開始", loading: "読み込み中..." }
-  };
+  useEffect(() => {
+    // 3.5초간 인트로 노출 후 메인으로 진입
+    const timer = setTimeout(() => setShowIntro(false), 3500);
+    return () => clearTimeout(timer);
+  }, []);
 
-  const fetchWord = async () => {
-    setLoading(true);
-    const { data, error } = await supabase.from('k_vocabulary').select('*').limit(1);
-    if (data) setWord(data[0]);
-    setLoading(false);
-  };
+  const t = translations[language] || translations.ko;
+
+  if (showIntro) {
+    return (
+      <div className="h-screen w-full bg-black flex flex-col items-center justify-center overflow-hidden relative">
+        <img
+          src="intro.jpg"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover opacity-60 animate-ken-burns"
+        />
+        <div className="relative z-10 text-center animate-in fade-in zoom-in duration-1000">
+          <h1 className="text-6xl font-black tracking-widest text-white mb-6">
+            {t.brand}
+          </h1>
+          <p className="text-2xl font-light tracking-[0.8rem] text-purple-400 italic">
+            {t.introSub}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-black text-white p-8">
-      <div className="flex justify-between items-center mb-16">
-        <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 rounded-full border-2 border-purple-500 flex items-center justify-center bg-black text-xl font-bold">흑</div>
-          <div>
-            <p className="text-xs text-purple-400">MASTER TIER</p>
-            <h2 className="text-xl font-bold">흑무영 Heukmuyeong</h2>
-          </div>
-        </div>
+    <div className="min-h-screen bg-[#050505] text-white font-sans antialiased">
+      <Navbar onMenuClick={setCurrentMenu} language={language} setLanguage={setLanguage} />
 
-        <div className="flex space-x-2 bg-black/40 p-1 rounded-lg border border-white/10">
-          {['en', 'es', 'jp'].map((lang) => (
-            <button
-              key={lang}
-              onClick={() => setLanguage(lang)}
-              className={`px-3 py-1 rounded-md text-sm transition-all ${language === lang ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white'}`}
-            >
-              {lang.toUpperCase()}
-            </button>
-          ))}
-        </div>
-      </div>
+      <main className="pt-36 max-w-6xl mx-auto px-10">
+        {currentMenu === 'home' && (
+          <section className="animate-in fade-in slide-in-from-bottom-10 duration-1000">
+            {/* 하이엔드 미니멀 히어로 섹션 */}
+            <div className="relative h-[380px] rounded-[2.5rem] overflow-hidden mb-16 border border-white/5 bg-[#0a0a0a]">
+              <div className="absolute inset-0 flex flex-col justify-center px-20 z-10">
+                <h2 className="text-4xl font-black mb-5 tracking-tighter leading-tight">
+                  {t.heroTitle}<br />
+                  <span className="text-purple-500">{t.heroSub}</span>
+                </h2>
+                <p className="text-sm text-gray-400 font-light italic leading-relaxed max-w-xl tracking-wide opacity-80">
+                  {t.heroDesc}
+                </p>
+              </div>
+            </div>
 
-      <div className="max-w-4xl mx-auto text-center mt-20">
-        <h1 className="text-7xl font-black italic tracking-tighter mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-pink-500">
-          K-LINGUA QUEST
-        </h1>
-        <p className="text-gray-400 tracking-[0.3em] font-light mb-12">
-          {i18n[language].subtitle}
-        </p>
-
-        {word ? (
-          <div className="bg-white/5 backdrop-blur-xl p-12 rounded-3xl border border-white/10 mb-8">
-            <h2 className="text-8xl font-bold mb-4">{word.word}</h2>
-            <p className="text-2xl text-purple-300 italic">{word[`meaning_${language}`] || word.meaning}</p>
-          </div>
-        ) : (
-          <button
-            onClick={fetchWord}
-            className="group relative inline-flex items-center justify-center px-12 py-6 font-bold text-black transition-all duration-200 bg-white rounded-full hover:bg-purple-500 hover:text-white"
-          >
-            {loading ? i18n[language].loading : i18n[language].start}
-            <span className="ml-3 text-2xl">▶</span>
-          </button>
+            {/* 순우리말 퀘스트 카드 섹션 */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pb-32">
+              {t.cards.map((card, i) => (
+                <div key={i} className="bg-[#0f0f0f] p-10 rounded-2xl border border-white/5 hover:border-purple-500/30 transition-all cursor-pointer group hover:-translate-y-1">
+                  <div className="w-10 h-0.5 bg-purple-600 mb-8 group-hover:w-16 transition-all" />
+                  <h3 className="text-2xl font-bold mb-4">{card.t}</h3>
+                  <p className="text-gray-500 text-sm leading-relaxed font-light">{card.d}</p>
+                </div>
+              ))}
+            </div>
+          </section>
         )}
-      </div>
+      </main>
     </div>
   );
 }
