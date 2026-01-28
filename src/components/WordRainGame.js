@@ -23,7 +23,7 @@ const WordRainGame = ({ settings, language, user, onGameOver }) => {
             } else {
                 const { data, error } = await supabase
                     .from('k_vocabulary')
-                    .select('hangeul, meaning')
+                    .select('hangeul, meaning, meaning_es, meaning_jp')
                     .eq('level', settings.level) // 흑무영님의 2~6단계 레벨링 매칭
                     .limit(100);
 
@@ -39,11 +39,17 @@ const WordRainGame = ({ settings, language, user, onGameOver }) => {
 
         const spawnInterval = setInterval(() => {
             const targetData = dbWords[Math.floor(Math.random() * dbWords.length)];
+
+            // 언어별 뜻 컬럼 결정
+            let currentMeaning = targetData.meaning; // 기본값 (영어)
+            if (language === 'es' && targetData.meaning_es) currentMeaning = targetData.meaning_es;
+            if (language === 'jp' && targetData.meaning_jp) currentMeaning = targetData.meaning_jp;
+
             const newWord = {
                 id: Date.now(),
                 // 모드에 따라 텍스트 결정: '한글 타이핑' 혹은 '뜻 타이핑'
-                text: settings.mode === 'hangeul' ? targetData.hangeul : targetData.meaning,
-                subText: settings.mode === 'hangeul' ? targetData.meaning : targetData.hangeul,
+                text: settings.mode === 'hangeul' ? targetData.hangeul : currentMeaning,
+                subText: settings.mode === 'hangeul' ? currentMeaning : targetData.hangeul,
                 x: Math.random() * 80 + 10,
                 y: -50, // 시작점 조정
                 speed: 0.8 + (settings.level * 0.4),

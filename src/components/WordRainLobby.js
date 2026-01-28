@@ -2,13 +2,26 @@ import React, { useState } from 'react';
 import { translations } from '../locales/languages';
 import RankingBoard from './RankingBoard';
 
-const WordRainLobby = ({ language, onStart, unlockedLevel = 1 }) => {
+const WordRainLobby = ({ language, onStart, unlockedLevel = 1, user }) => {
     const [selectedLevel, setSelectedLevel] = useState(1);
     const [mode, setMode] = useState('hangeul');
 
     // App.js에서 전달받은 language 상태에 따라 즉시 데이터 동기화
     const t = translations[language] || translations.ko;
     const lobbyData = t.lobby;
+
+    // 닉네임 로직
+    const userNickname = user?.email?.split('@')[0] || localStorage.getItem('user_nickname') || 'Guest';
+
+    // 환영 메시지 구성
+    let welcomeMessage = '';
+    if (lobbyData && lobbyData.welcome) {
+        if (language === 'ko' || language === 'jp') {
+            welcomeMessage = `${userNickname}${lobbyData.welcome}`;
+        } else {
+            welcomeMessage = `${lobbyData.welcome}${userNickname}!`;
+        }
+    }
 
     if (!lobbyData) return <div className="text-white">Loading...</div>;
 
@@ -20,10 +33,14 @@ const WordRainLobby = ({ language, onStart, unlockedLevel = 1 }) => {
             </div>
 
             <div className="relative z-10 p-16 flex flex-col items-center">
-                <h2 className="text-4xl font-black mb-2 tracking-tighter">
+                {/* Welcome Msg */}
+                <div id="welcome-msg" className="mb-6 text-xl font-bold text-purple-300 animate-pulse tracking-wide">
+                    {welcomeMessage}
+                </div>
+                <h2 className="lobby-title text-4xl font-black mb-2 tracking-tighter">
                     {lobbyData.title} <span className="text-blue-400 text-lg ml-2 font-light">{lobbyData.subTitle}</span>
                 </h2>
-                <p className="text-gray-400 mb-12 italic">{lobbyData.desc}</p>
+                <p className="lobby-description text-gray-400 mb-12 italic">{lobbyData.desc}</p>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl mb-12">
                     {lobbyData.levels.map((l) => {
@@ -65,16 +82,34 @@ const WordRainLobby = ({ language, onStart, unlockedLevel = 1 }) => {
                     </button>
                 </div>
 
-                <button
-                    onClick={() => onStart({ level: selectedLevel, mode })}
-                    className="group relative px-16 py-5 bg-purple-600 rounded-full text-xl font-black tracking-[0.5rem] hover:bg-purple-500 transition-all shadow-[0_0_30px_rgba(168,85,247,0.4)] mb-16"
-                >
-                    {lobbyData.startBtn}
-                    <span className="absolute -right-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 group-hover:-right-4 transition-all">→</span>
-                </button>
+                <div className="flex space-x-4 mb-16">
+                    <button
+                        id="start-btn"
+                        onClick={() => onStart({ level: selectedLevel, mode })}
+                        className="group relative px-12 py-5 bg-purple-600 rounded-full text-xl font-black tracking-[0.3rem] hover:bg-purple-500 transition-all shadow-[0_0_30px_rgba(168,85,247,0.4)]"
+                    >
+                        {lobbyData.startBtn}
+                        <span className="absolute -right-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 group-hover:-right-4 transition-all">→</span>
+                    </button>
+                    <button
+                        id="rank-btn"
+                        onClick={() => {
+                            const rankSection = document.getElementById('ranking-board-section');
+                            if (rankSection) rankSection.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                        className="px-8 py-5 border border-white/20 rounded-full text-lg font-bold hover:bg-white/10 transition-all"
+                    >
+                        {lobbyData.rankBtn || "RANKING"}
+                    </button>
+                    <button
+                        className="px-8 py-5 border border-white/20 rounded-full text-lg font-bold hover:bg-white/10 transition-all text-gray-300"
+                    >
+                        {lobbyData.profileSet || "Profile"}
+                    </button>
+                </div>
 
                 {/* 글로벌 랭킹 보드 탑재 */}
-                <div className="mt-20 w-full max-w-4xl">
+                <div id="ranking-board-section" className="mt-20 w-full max-w-4xl">
                     <RankingBoard language={language} />
                 </div>
             </div>

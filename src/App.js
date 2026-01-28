@@ -11,7 +11,11 @@ import LiveTicker from './components/LiveTicker';
 function App() {
   const [showIntro, setShowIntro] = useState(true);
   const [currentMenu, setCurrentMenu] = useState('home');
-  const [language, setLanguage] = useState('ko');
+  const [language, setLanguage] = useState(localStorage.getItem('selectedLang') || 'ko');
+
+  useEffect(() => {
+    localStorage.setItem('selectedLang', language);
+  }, [language]);
   const [gameState, setGameState] = useState('lobby'); // 'lobby' or 'playing'
   const [gameSettings, setGameSettings] = useState(null);
   const [unlockedLevel, setUnlockedLevel] = useState(1); // 해금된 최고 레벨
@@ -142,6 +146,7 @@ function App() {
               <WordRainLobby
                 language={language}
                 unlockedLevel={unlockedLevel} // 해금 상태 전달
+                user={user}
                 onStart={(settings) => {
                   setGameSettings(settings);
                   setGameState('playing'); // 게임 시작 상태로 전환

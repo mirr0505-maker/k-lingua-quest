@@ -16,14 +16,17 @@ export const translations = {
             { t: '글 풀이', d: '세련된 문장과 퀴즈를 통해 실력을 증명하십시오.' }
         ],
         lobby: {
-            title: "한글 비",
+            title: "한글 비 퀘스트",
             subTitle: "QUEST LOBBY",
-            desc: "단계별 정복을 통해 한글의 대가가 되십시오.",
+            desc: "하늘에서 내려오는 단어를 맞혀보세요!",
 
             placeholder: "단어를 입력하고 엔터",
             modeHangeul: "한글 타이핑 모드",
             modeMeaning: "뜻 타이핑 모드",
-            startBtn: "진격 START",
+            startBtn: "시작하기",
+            rankBtn: "랭킹보기",
+            profileSet: "프로필 설정",
+            welcome: "님, 환영합니다!",
             levels: [
                 { id: 1, name: '입문 (Beginner)', desc: '한글 자음/모음', locked: false },
                 { id: 2, name: '초보 (Novice)', desc: 'K-Culture 한 단어', locked: true },
@@ -50,14 +53,17 @@ export const translations = {
             { t: 'Word Quiz', d: 'Prove your skills with quizzes.' }
         ],
         lobby: {
-            title: "Word Rain",
+            title: "Hangeul Rain Quest",
             subTitle: "QUEST LOBBY",
-            desc: "Become a master of Hangeul step-by-step.",
+            desc: "Catch the words falling from the sky!",
 
             placeholder: "Type word and press Enter",
             modeHangeul: "Hangeul Mode",
             modeMeaning: "Meaning Mode",
-            startBtn: "START QUEST",
+            startBtn: "Start",
+            rankBtn: "Rankings",
+            profileSet: "Profile Setup",
+            welcome: "Welcome, ",
             levels: [
                 { id: 1, name: 'Beginner', desc: 'Consonants/Vowels', locked: false },
                 { id: 2, name: 'Novice', desc: 'Basic K-Culture', locked: true },
@@ -84,10 +90,14 @@ export const translations = {
             { t: 'Quiz', d: 'Demuestra tu nivel.' }
         ],
         lobby: {
-            title: "Lluvia", subTitle: "MISIÓN", desc: "Sé un maestro del Hangeul.",
+            title: "Misión de Lluvia Hangeul", subTitle: "MISIÓN", desc: "¡Atrapa las palabras que caen del cielo!",
 
             placeholder: "Escribe y presiona Enter",
-            modeHangeul: "Hangeul", modeMeaning: "Significado", startBtn: "¡VAMOS!",
+            modeHangeul: "Hangeul", modeMeaning: "Significado",
+            startBtn: "Comenzar",
+            rankBtn: "Clasificación",
+            profileSet: "Perfil",
+            welcome: "¡Bienvenido, ",
             levels: [
                 { id: 1, name: 'Principiante', desc: 'Alfabeto', locked: false },
                 { id: 2, name: 'Novato', desc: 'Cultura K Básica', locked: true },
@@ -114,10 +124,14 @@ export const translations = {
             { t: '文字解き', d: 'クイズで実力を証明。' }
         ],
         lobby: {
-            title: "ハングルの雨", subTitle: "ロビー", desc: "段階的に達人を目指そう。",
+            title: "ハングル雨クエスト", subTitle: "ロビー", desc: "空から降ってくる単語를当ててみましょう！",
 
             placeholder: "単語を入力してエンター",
-            modeHangeul: "ハングル入力", modeMeaning: "意味入力", startBtn: "進격!",
+            modeHangeul: "ハングル入力", modeMeaning: "意味入力",
+            startBtn: "スタート",
+            rankBtn: "ランキング",
+            profileSet: "プロフィール設定",
+            welcome: "さん, ようこそ！",
             levels: [
                 { id: 1, name: '入門', desc: '子音/母音', locked: false },
                 { id: 2, name: '初級', desc: '基礎単語', locked: true },
