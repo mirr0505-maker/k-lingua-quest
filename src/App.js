@@ -148,6 +148,8 @@ function App() {
                 unlockedLevel={unlockedLevel} // 해금 상태 전달
                 user={user}
                 onStart={(settings) => {
+                  const nickname = user?.email?.split('@')[0] || localStorage.getItem('user_nickname') || 'Guest';
+                  console.log(`${nickname}의 퀘스트 시작: [${settings.category || 'General'}]`);
                   setGameSettings(settings);
                   setGameState('playing'); // 게임 시작 상태로 전환
                 }}

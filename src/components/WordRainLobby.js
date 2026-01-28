@@ -5,6 +5,10 @@ import RankingBoard from './RankingBoard';
 const WordRainLobby = ({ language, onStart, unlockedLevel = 1, user }) => {
     const [selectedLevel, setSelectedLevel] = useState(1);
     const [mode, setMode] = useState('hangeul');
+    const [category, setCategory] = useState('General');
+
+    // 카테고리 목록
+    const categories = ['General', 'K-Food', 'K-Pop', 'K-Drama'];
 
     // App.js에서 전달받은 language 상태에 따라 즉시 데이터 동기화
     const t = translations[language] || translations.ko;
@@ -82,10 +86,26 @@ const WordRainLobby = ({ language, onStart, unlockedLevel = 1, user }) => {
                     </button>
                 </div>
 
+                {/* 카테고리 선택 UI */}
+                <div className="flex space-x-3 mb-10 overflow-x-auto max-w-full pb-2">
+                    {categories.map((cat) => (
+                        <button
+                            key={cat}
+                            onClick={() => setCategory(cat)}
+                            className={`px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${category === cat
+                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
+                                : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/5'
+                                }`}
+                        >
+                            {cat}
+                        </button>
+                    ))}
+                </div>
+
                 <div className="flex space-x-4 mb-16">
                     <button
                         id="start-btn"
-                        onClick={() => onStart({ level: selectedLevel, mode })}
+                        onClick={() => onStart({ level: selectedLevel, mode, category })}
                         className="group relative px-12 py-5 bg-purple-600 rounded-full text-xl font-black tracking-[0.3rem] hover:bg-purple-500 transition-all shadow-[0_0_30px_rgba(168,85,247,0.4)]"
                     >
                         {lobbyData.startBtn}
