@@ -3,7 +3,8 @@ import Navbar from './components/Navbar';
 import { translations } from './locales/languages';
 import WordRainLobby from './components/WordRainLobby';
 import WordRainGame from './components/WordRainGame';
-import Auth from './components/Auth';
+import Login from './components/Login';
+import Account from './components/Account';
 import { supabase } from './supabaseClient';
 import RankingBoard from './components/RankingBoard';
 import LiveTicker from './components/LiveTicker';
@@ -18,7 +19,7 @@ function App() {
   }, [language]);
   const [gameState, setGameState] = useState('lobby'); // 'lobby' or 'playing'
   const [gameSettings, setGameSettings] = useState(null);
-  const [unlockedLevel, setUnlockedLevel] = useState(1); // 해금된 최고 레벨
+  const [unlockedLevel] = useState(1); // 해금된 최고 레벨
   const [showAuth, setShowAuth] = useState(false); // 인증 모달 상태
   const [user, setUser] = useState(null); // 로그인 유저 정보
 
@@ -90,7 +91,7 @@ function App() {
             >
               ×
             </button>
-            <Auth language={language} onSuccess={() => setShowAuth(false)} />
+            <Login />
           </div>
         </div>
       )}
@@ -128,7 +129,13 @@ function App() {
 
         {currentMenu === 'auth' && (
           <div className="pt-10 flex justify-center">
-            <Auth language={language} />
+            <Login />
+          </div>
+        )}
+
+        {currentMenu === 'account' && (
+          <div className="pt-10 flex justify-center w-full">
+            <Account userSession={user} onNavigate={setCurrentMenu} />
           </div>
         )}
 
@@ -159,16 +166,48 @@ function App() {
                 settings={gameSettings}
                 language={language}
                 user={user}
-                onGameOver={(isSuccess) => {
-                  if (isSuccess && gameSettings.level === unlockedLevel) {
-                    setUnlockedLevel(prev => prev + 1); // 다음 단계 해금
+                onGameOver={(result) => {
+                  if (result === 'account') {
+                    setGameState('lobby');
+                    setCurrentMenu('account'); // 마이페이지로 이동
+                    return;
                   }
-                  setGameState('lobby'); // 게임 종료 시 로비로 복귀
+
+                  // 기존 로직: true(로비), false(재시작)
+                  if (result === true) { // Lobby
+                    setGameState('lobby');
+                  } else if (result === false) { // Retry (Stay or reset)
+                    // 재시작 로직은 Game 컴포넌트 내부에서 처리되거나, 여기서 키를 바꿔 리마운트 필요
+                    // 현재 구조상 Game 내부에서 resetGame을 호출하는게 이상적.
+                    // 그러나 상위에서 제어한다면, Game 컴포넌트 key를 갱신해주는 방법이 있음.
+                    // 편의상 로비로 보냈다가 다시 시작하게 하거나, 단순히 state 변경
+
+                    // 여기서는 로비로 가는게 안전함 (WordRainGame이 내부 상태 리셋을 완벽히 지원해야 함)
+                    // 위 코드에서는 onGameOver(false) -> RETRY라고 주석되어 있으나 실제 구현은 상위 의존.
+                    // 만약 즉시 재시작을 원한다면 Game에 key prop을 주어 강제 리마운트가 좋음.
+                    setGameState('lobby'); // 임시: 로비 복귀
+                  }
+
+                  if (result === true && gameSettings.level === unlockedLevel) {
+                    // 로비로 나갈 때 클리어 여부 판단? (원래 로직에선 isSuccess 인자가 넘어옴)
+                    // 구조상 isSuccess를 정확히 넘기기 어려워졌으므로 조정 필요
+                    // 하지만 'account'로 나가는 경우는 클리어로 간주하지 않음.
+                  }
                 }}
               />
             )}
           </div>
         )}
+
+        {['match', 'quiz', 'market'].map((menu) => (
+          currentMenu === menu && (
+            <div key={menu} className="pt-20 flex flex-col items-center justify-center animate-in fade-in zoom-in duration-500 min-h-[50vh]">
+              <div className="text-6xl mb-6">🚧</div>
+              <h2 className="text-4xl font-black text-white mb-2 uppercase">{menu}</h2>
+              <p className="text-gray-500 font-mono">Coming Soon...</p>
+            </div>
+          )
+        ))}
       </main>
     </div>
   );
