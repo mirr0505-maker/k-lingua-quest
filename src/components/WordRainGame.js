@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { WordBubble } from './WordItem';
 import { translations } from '../locales/languages';
 import { supabase } from '../supabaseClient';
 import { fetchWordsByCategory } from '../api';
@@ -14,6 +15,7 @@ const WordRainGame = ({ settings, language, user, onGameOver }) => {
     const [dbWords, setDbWords] = useState([]);
     const [score, setScore] = useState(0);
     const [hearts, setHearts] = useState(5);
+    const [renderingWords, setRenderingWords] = useState([]); // State for rendering DOM-based bubbles
     const [toast, setToast] = useState({ show: false, text: '' }); // Toast State
     const t = translations[language] || translations.ko;
 
@@ -120,7 +122,11 @@ const WordRainGame = ({ settings, language, user, onGameOver }) => {
                     y: -30,
                     speed: speed,
                     width: ctx.measureText(text).width,
-                    tier: tierLevel // Store tier for rendering logic (e.g. WordItem visual hints)
+                    width: ctx.measureText(text).width,
+                    tier: tierLevel, // Store tier for rendering logic
+                    id: Date.now() + Math.random(), // Unique ID for key
+                    isMatched: false,
+                    matchedAt: 0
                 });
             }
 
@@ -134,13 +140,20 @@ const WordRainGame = ({ settings, language, user, onGameOver }) => {
                 });
 
                 if (index !== -1) {
-                    const matched = this.words.splice(index, 1)[0];
+                    const matchedWord = this.words[index];
+
+                    if (matchedWord.isMatched) return false; // Already matched
+
+                    // Mark as matched instead of removing immediately
+                    matchedWord.isMatched = true;
+                    matchedWord.matchedAt = Date.now();
+
                     this.score += 10;
                     setScore(this.score);
 
                     setToast({
                         show: true,
-                        text: `${matched.text} : ${matched.meaning || 'Correct!'}`
+                        text: `${matchedWord.text} : ${matchedWord.meaning || 'Correct!'}`
                     });
 
                     setTimeout(() => setToast(prev => ({ ...prev, show: false })), 1500);
@@ -169,111 +182,16 @@ const WordRainGame = ({ settings, language, user, onGameOver }) => {
 
                 for (let i = this.words.length - 1; i >= 0; i--) {
                     let word = this.words[i];
-                    word.y += word.speed;
-
-                    // Bubble Effect
-                    ctx.fillStyle = "rgba(59, 130, 246, 0.1)";
-                    ctx.beginPath();
-                    ctx.arc(word.x, word.y, 40, 0, Math.PI * 2);
-                    ctx.fill();
-
-                    ctx.strokeStyle = "rgba(96, 165, 250, 0.3)";
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-
-                    // Text Rendering based on Tier
-                    ctx.shadowBlur = 4;
-                    ctx.shadowColor = "rgba(0,0,0,0.5)";
-                    ctx.fillStyle = "#ffffff";
-
-                    if (word.tier === 2) {
-                        // Tier 2: First char Bold, rest faded
-                        const firstChar = word.text.charAt(0);
-                        const rest = word.text.slice(1);
-
-                        // Measure for centering logic (simplified approximation since exact multi-style centering is complex)
-                        // Or just render blindly:
-                        const totalWidth = ctx.measureText(word.text).width;
-                        const startX = word.x - (totalWidth / 2); // Assuming textAlign was center
-
-                        ctx.textAlign = "left"; // Temporarily switch checks
-                        ctx.fillStyle = "#ffffff";
-                        ctx.font = "900 24px 'Noto Sans KR', sans-serif"; // Extra Bold
-                        ctx.fillText(firstChar, startX, word.y);
-
-                        const firstWidth = ctx.measureText(firstChar).width;
-
-                        ctx.fillStyle = "rgba(156, 163, 175, 0.6)"; // Gray-400 opacity
-                        ctx.font = "bold 24px 'Noto Sans KR', sans-serif";
-                        ctx.fillText(rest, startX + firstWidth, word.y);
-
-                        ctx.textAlign = "center"; // Restore
-
-                    } else if (word.tier === 4) {
-                        // Tier 4: Adjective (Gray) + Noun (White) e.g. "매운 김치"
-                        const parts = word.text.split(' ');
-
-                        if (parts.length >= 2) {
-                            const totalWidth = ctx.measureText(word.text).width;
-                            const startX = word.x - (totalWidth / 2);
-
-                            ctx.textAlign = "left";
-
-                            // Adjective (Gray)
-                            ctx.fillStyle = "rgba(156, 163, 175, 0.6)";
-                            ctx.fillText(parts[0], startX, word.y);
-                            const p1Width = ctx.measureText(parts[0]).width;
-
-                            // Space
-                            const spaceWidth = ctx.measureText(' ').width;
-
-                            // Noun (White)
-                            ctx.fillStyle = "#ffffff";
-                            ctx.fillText(parts[1], startX + p1Width + spaceWidth, word.y);
-
-                            ctx.textAlign = "center";
-                        } else {
-                            ctx.fillStyle = "#ffffff";
-                            ctx.fillText(word.text, word.x, word.y);
+                    // Handle Matched Words
+                    if (word.isMatched) {
+                        // Remove after animation (300ms buffer for 200ms animation)
+                        if (Date.now() - word.matchedAt > 300) {
+                            this.words.splice(i, 1);
                         }
-
-                    } else if (word.tier === 5) {
-                        // Tier 5: Purple Pulse
-                        // Pulse effect using sin wave on alpha or lightness
-                        const pulse = Math.abs(Math.sin(Date.now() / 200));
-                        // Color: Purple-400 (#c084fc)
-                        ctx.fillStyle = `rgba(192, 132, 252, ${0.7 + (pulse * 0.3)})`;
-                        ctx.shadowColor = `rgba(168, 85, 247, ${0.5 + (pulse * 0.5)})`; // Purple glow
-                        ctx.shadowBlur = 10 + (pulse * 5);
-
-                        ctx.fillText(word.text, word.x, word.y);
-
-                    } else if (word.tier === 6) {
-                        // Tier 6: Master (Golden Chaos)
-                        // Effect: Strong Yellow Glow + Slight Shake (Vibration)
-
-                        // Vibration
-                        const shakeX = (Math.random() - 0.5) * 4; // +/- 2px shake
-                        const shakeY = (Math.random() - 0.5) * 4;
-
-                        ctx.fillStyle = "#FACC15"; // Yellow-400
-                        ctx.shadowColor = "rgba(250, 204, 21, 0.8)"; // Yellow Glow
-                        ctx.shadowBlur = 20;
-
-                        // Draw with shake offset
-                        ctx.fillText(word.text, word.x + shakeX, word.y + shakeY);
-
-                    } else {
-                        // Default (Tier 1, 3, etc)
-                        ctx.fillStyle = "#ffffff";
-                        ctx.fillText(word.text, word.x, word.y);
+                        continue; // Skip physics and collision for matched words
                     }
 
-
-
-                    ctx.shadowBlur = 0;
-                    ctx.textAlign = "center"; // Ensure reset
-                    ctx.font = "bold 24px 'Noto Sans KR', sans-serif"; // Ensure reset
+                    word.y += word.speed;
 
                     // Floor Collision
                     if (word.y > canvas.height + 40) {
@@ -287,6 +205,9 @@ const WordRainGame = ({ settings, language, user, onGameOver }) => {
                         }
                     }
                 }
+
+                // Update React State for DOM Rendering
+                setRenderingWords([...this.words]);
 
                 this.animationId = requestAnimationFrame(this.update);
             }
@@ -441,6 +362,24 @@ const WordRainGame = ({ settings, language, user, onGameOver }) => {
 
             {/* Canvas Layer */}
             <canvas ref={canvasRef} className="block w-full h-full" />
+
+            {/* DOM Overlay for Words (Replaces Canvas Drawing) */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                {renderingWords.map((word) => (
+                    <div
+                        key={word.id}
+                        className="absolute will-change-transform"
+                        style={{
+                            left: word.x,
+                            top: word.y,
+                            transform: 'translate(-50%, -50%)',
+                            zIndex: word.isMatched ? 0 : 10 // Matched words behind? or keep same.
+                        }}
+                    >
+                        <WordBubble word={word.text} tier={word.tier} isMatched={word.isMatched} />
+                    </div>
+                ))}
+            </div>
 
             {/* Input Layer */}
             <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-full max-w-lg px-8">

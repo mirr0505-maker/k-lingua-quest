@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { translations } from '../locales/languages';
 import { supabase } from '../supabaseClient';
 
+import { ThemeToggle } from './ThemeToggle';
+
 const Navbar = ({ onMenuClick, language, setLanguage, user, onAuthClick }) => {
     const [isPlayMenuOpen, setIsPlayMenuOpen] = useState(false);
     const [isLangOpen, setIsLangOpen] = useState(false);
@@ -93,6 +95,8 @@ const Navbar = ({ onMenuClick, language, setLanguage, user, onAuthClick }) => {
 
                 {/* 우측 영역 (언어 + 계정) */}
                 <div className="flex items-center space-x-6">
+                    <ThemeToggle />
+
                     {/* 언어 선택 */}
                     <div className="relative">
                         <button onClick={() => setIsLangOpen(!isLangOpen)} className="text-xs font-bold text-gray-400 hover:text-white flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/5 transition">

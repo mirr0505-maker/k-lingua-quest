@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../supabaseClient';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -40,27 +41,33 @@ export default function Login() {
         setLoading(false);
     };
 
-    return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white p-6">
-            <div className="w-full max-w-md space-y-8 bg-gray-900/50 p-10 rounded-3xl border border-gray-800 backdrop-blur-md shadow-2xl">
+    const { isDark } = useTheme();
 
-                {/* 문구 변경: Join the Hangul madang */}
-                <h2 className="text-center text-4xl font-extrabold tracking-tight mb-4">
-                    Join the <span className="text-purple-500 text-shadow-glow">Hangul madang</span>
+    return (
+        <div className={`min-h-screen flex items-center justify-center transition-colors duration-500 ${isDark ? 'bg-black' : 'bg-slate-50'}`}>
+            <div className={`w-full max-w-md p-10 rounded-[2.5rem] border backdrop-blur-xl transition-all shadow-2xl
+        ${isDark
+                    ? 'bg-white/10 border-white/10 text-white shadow-purple-500/10'
+                    : 'bg-white/70 border-black/5 text-slate-900 shadow-slate-200'}`}>
+
+                <h2 className="text-center text-4xl font-black mb-8 tracking-tighter">
+                    Join the <span className="text-purple-600">madang</span>
                 </h2>
 
-                {/* SNS 로그인 영역: 구글만 활성, 나머지는 UI용 */}
-                <div className="space-y-3">
+                {/* SNS 로그인 영역 */}
+                <div className="space-y-3 mb-6">
                     <button
                         onClick={signInWithGoogle}
-                        className="w-full flex items-center justify-center bg-white text-black py-3 rounded-full font-bold hover:bg-gray-200 transition duration-300"
+                        className={`w-full flex items-center justify-center py-3 rounded-full font-bold transition duration-300
+                            ${isDark ? 'bg-white text-black hover:bg-gray-200' : 'bg-slate-900 text-white hover:bg-slate-800'}`}
                     >
                         <img src="https://www.google.com/favicon.ico" className="w-5 h-5 mr-2" alt="Google" />
                         CONTINUE WITH GOOGLE
                     </button>
                     <div className="flex justify-between gap-2">
                         {['Apple', 'Facebook', 'X', 'GitHub'].map(sns => (
-                            <button key={sns} className="flex-1 py-2 bg-gray-800 rounded-lg text-[10px] text-gray-500 cursor-not-allowed opacity-50">
+                            <button key={sns} className={`flex-1 py-2 rounded-lg text-[10px] cursor-not-allowed opacity-50
+                                ${isDark ? 'bg-gray-800 text-gray-500' : 'bg-slate-200 text-slate-500'}`}>
                                 {sns}
                             </button>
                         ))}
@@ -68,17 +75,17 @@ export default function Login() {
                 </div>
 
                 <div className="relative flex items-center py-4">
-                    <div className="flex-grow border-t border-gray-800"></div>
-                    <span className="flex-shrink mx-4 text-gray-600 text-xs uppercase font-semibold">OR</span>
-                    <div className="flex-grow border-t border-gray-800"></div>
+                    <div className={`flex-grow border-t ${isDark ? 'border-gray-800' : 'border-slate-200'}`}></div>
+                    <span className={`flex-shrink mx-4 text-xs uppercase font-semibold ${isDark ? 'text-gray-600' : 'text-slate-400'}`}>OR</span>
+                    <div className={`flex-grow border-t ${isDark ? 'border-gray-800' : 'border-slate-200'}`}></div>
                 </div>
 
-                {/* 이메일 + 패스워드 입력창 구성 */}
                 <form onSubmit={handleLogin} className="space-y-4">
                     <input
                         type="email"
-                        placeholder="YOUR EMAIL ADDRESS"
-                        className="w-full px-5 py-4 bg-gray-800/80 border border-gray-700 rounded-full focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition duration-300 text-white"
+                        placeholder="YOUR EMAIL"
+                        className={`w-full px-6 py-4 rounded-full border transition-all outline-none
+              ${isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-slate-200 focus:border-purple-500 text-slate-900'}`}
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
@@ -86,7 +93,8 @@ export default function Login() {
                     <input
                         type="password"
                         placeholder="YOUR PASSWORD"
-                        className="w-full px-5 py-4 bg-gray-800/80 border border-gray-700 rounded-full focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition duration-300 text-white"
+                        className={`w-full px-6 py-4 rounded-full border transition-all outline-none
+              ${isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-slate-200 focus:border-purple-500 text-slate-900'}`}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
@@ -94,9 +102,9 @@ export default function Login() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full py-4 bg-purple-600 rounded-full font-bold text-lg hover:bg-purple-700 shadow-[0_0_20px_rgba(168,85,247,0.4)] active:scale-95 transition duration-300"
+                        className="w-full py-4 bg-purple-600 text-white rounded-full font-bold hover:brightness-110 active:scale-95 transition shadow-lg shadow-purple-500/30"
                     >
-                        {loading ? 'PROCESSING...' : 'LOGIN / SIGN UP'}
+                        {loading ? 'PROCESSING...' : 'CONTINUE'}
                     </button>
                 </form>
             </div>

@@ -8,8 +8,11 @@ import Account from './components/Account';
 import { supabase } from './supabaseClient';
 import RankingBoard from './components/RankingBoard';
 import LiveTicker from './components/LiveTicker';
+import GlassCard from './components/GlassCard';
+import { useTheme } from './context/ThemeContext';
 
 function App() {
+  const { isDark } = useTheme();
   const [showIntro, setShowIntro] = useState(true);
   const [currentMenu, setCurrentMenu] = useState('home');
   const [language, setLanguage] = useState(localStorage.getItem('selectedLang') || 'ko');
@@ -67,7 +70,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white font-sans antialiased overflow-x-hidden">
+    <div className={`min-h-screen font-sans antialiased overflow-x-hidden transition-colors duration-500 ${isDark ? 'bg-[#050505] text-white' : 'bg-gray-50 text-gray-900'}`}>
       <Navbar
         onMenuClick={setCurrentMenu}
         language={language}
@@ -117,11 +120,11 @@ function App() {
             {/* 3대 퀘스트 카드 섹션 */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-10 pb-32">
               {t.cards?.map((card, i) => (
-                <div key={i} className="bg-[#0f0f0f] p-12 rounded-[2.5rem] border border-white/5 hover:border-purple-500/40 transition-all cursor-pointer group hover:-translate-y-2 shadow-lg">
-                  <div className="w-12 h-0.5 bg-purple-600 mb-10 group-hover:w-20 transition-all duration-500" />
+                <GlassCard key={i} isDark={isDark}>
+                  <div className="w-12 h-0.5 bg-purple-600 mb-10 transition-all duration-500" />
                   <h3 className="text-2xl font-bold mb-5 tracking-tight">{card.t}</h3>
-                  <p className="text-gray-500 text-sm leading-relaxed font-light opacity-80">{card.d}</p>
-                </div>
+                  <p className="opacity-80 text-sm leading-relaxed font-light">{card.d}</p>
+                </GlassCard>
               ))}
             </div>
           </section>

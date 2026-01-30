@@ -1,12 +1,15 @@
 import React from 'react';
+import { useTheme } from '../context/ThemeContext';
 
-export const ThemeToggle = ({ isDark, setIsDark }) => {
+export const ThemeToggle = () => {
+    const { isDark, setIsDark } = useTheme();
+
     return (
         <button
             onClick={() => setIsDark(!isDark)}
-            className="p-2 rounded-full border border-gray-500/30 transition-all hover:scale-110 flex items-center gap-2 font-bold text-sm bg-white/10 backdrop-blur-md"
+            className="p-2 rounded-full border border-gray-500/30 transition-all hover:scale-110"
         >
-            {isDark ? '☀️ Light' : '🌙 Dark'}
+            {isDark ? '☀️ Light Mode' : '🌙 Dark Mode'}
         </button>
     );
 };

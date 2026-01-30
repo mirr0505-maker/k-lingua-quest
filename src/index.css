@@ -30,6 +30,49 @@
     .game-hud-item {
         @apply flex items-center gap-2 text-green-400 font-bold text-xl;
     }
+
+    /* 라이트 모드 전용 글래스 효과 클래스 */
+    .light-glass {
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        /* 부드러운 그림자 */
+    }
+
+    /* 텍스트 가독성 최적화 */
+    .light-text-sub {
+        color: rgba(15, 23, 42, 0.6);
+        /* 보조 텍스트 (Slate 600 수준) */
+    }
+
+    /* 물방울(Bubble) UI 엔진 */
+    .k-bubble {
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(4px);
+        transition: all 0.3s ease;
+        box-shadow: inset -5px -5px 15px rgba(255, 255, 255, 0.1),
+            inset 5px 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 테마별 디테일: 다크 모드 */
+    /* .dark 클래스가 상위 요소(html 등)에 있을 때 적용 */
+    :global(.dark) .k-bubble {
+        background: rgba(168, 85, 247, 0.15);
+        /* 보라색 빛 */
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* 테마별 디테일: 라이트 모드 (dark 클래스가 없을 때) */
+    :global(:not(.dark)) .k-bubble {
+        background: rgba(255, 255, 255, 0.4);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        box-shadow: inset -3px -3px 10px rgba(0, 0, 0, 0.05),
+            inset 3px 3px 10px rgba(255, 255, 255, 0.8);
+    }
 }
 
 /* 표준 CSS 애니메이션 키프레임 */

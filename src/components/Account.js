@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Account({ userSession, onNavigate }) {
+    const { isDark } = useTheme();
     const [user, setUser] = useState(userSession);
     const [scores, setScores] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -57,9 +59,8 @@ export default function Account({ userSession, onNavigate }) {
                     setScores(data ? data.reverse() : []);
                 }
 
-                // 3. 레벨별 캐릭터 매핑 (임시 로직: DB 데이터가 아직 없으므로 2레벨 가정)
-                // 추후 DB의 'level' 필드와 연동 가능
-                const userLevel = 2;
+                // 3. 레벨별 캐릭터 매핑
+                const userLevel = 2; // TODO: DB 연동
                 if (userLevel === 1) setCharacter({ icon: '🐣', title: 'K-Baby' });
                 else if (userLevel === 2) setCharacter({ icon: '👨🎓', title: 'K-Student' });
                 else if (userLevel >= 3) setCharacter({ icon: '⚔️', title: 'K-Warrior' });
@@ -70,63 +71,89 @@ export default function Account({ userSession, onNavigate }) {
         loadData();
     }, [userSession]);
 
-    if (loading) return <div className="text-white text-center mt-20 font-bold animate-pulse">데이터 로딩 중...</div>;
+    if (loading) return <div className="text-gray-500 text-center mt-20 font-bold animate-pulse">데이터 로딩 중...</div>;
 
     return (
-        <div className="min-h-screen w-full bg-black text-white p-6 md:p-8 animate-in fade-in zoom-in duration-500">
+        <div className={`min-h-screen w-full p-6 md:p-8 animate-in fade-in zoom-in duration-500 transition-colors
+            ${isDark ? 'bg-black text-white' : 'bg-slate-50 text-slate-900'}`}>
 
-            {/* 프로필 헤더 (Step 3 Refresh) */}
-            <div className="flex items-center gap-6 mb-12 bg-gray-900/50 backdrop-blur-md p-6 rounded-[2rem] border border-gray-800 shadow-2xl">
+            {/* 프로필 헤더 */}
+            <div className={`flex items-center gap-6 mb-12 p-6 rounded-[2rem] border transition-all duration-300
+                ${isDark
+                    ? 'bg-gray-900/50 backdrop-blur-md border-gray-800 shadow-2xl'
+                    : 'bg-white border-slate-200 shadow-xl'}`}>
+
                 <div className="relative">
-                    <div className="w-24 h-24 bg-gradient-to-tr from-purple-800 to-indigo-900 rounded-full flex items-center justify-center text-5xl shadow-[0_0_20px_rgba(147,51,234,0.4)] border-2 border-purple-500/20">
+                    <div className="w-24 h-24 bg-gradient-to-tr from-purple-600 to-indigo-600 rounded-full flex items-center justify-center text-5xl shadow-[0_0_20px_rgba(147,51,234,0.4)] border-4 border-white/10">
                         {character.icon}
                     </div>
-                    <span className="absolute -bottom-2 -right-2 bg-purple-600/90 backdrop-blur-sm px-2 py-0.5 rounded-md text-[10px] font-bold border border-white/10 shadow-lg">
+                    <span className={`absolute -bottom-2 -right-2 px-3 py-1 rounded-lg text-[10px] font-bold border shadow-lg
+                        ${isDark
+                            ? 'bg-gray-800 border-white/10 text-white'
+                            : 'bg-white border-slate-100 text-slate-900'}`}>
                         {character.title}
                     </span>
                 </div>
 
                 <div className="ml-2">
-                    <p className="text-gray-500 text-xs font-medium mb-1 tracking-wider uppercase">Welcome back,</p>
-                    <h1 className="text-2xl font-black tracking-tight mb-2 text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">
+                    <p className={`text-xs font-bold mb-1 tracking-wider uppercase ${isDark ? 'text-gray-500' : 'text-slate-400'}`}>
+                        Welcome back,
+                    </p>
+                    <h1 className={`text-3xl font-black tracking-tight mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                         {user?.email?.split('@')[0] || 'GUEST'}
                     </h1>
-                    <div className="flex items-end gap-2 text-xs text-gray-400 bg-black/40 px-3 py-1.5 rounded-lg border border-white/5 w-fit">
+                    <div className={`flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg border w-fit
+                        ${isDark
+                            ? 'bg-black/40 border-white/5 text-gray-400'
+                            : 'bg-slate-100 border-slate-200 text-slate-500'}`}>
                         <span className="text-base">{clientInfo.flag}</span>
                         <div className="flex flex-col leading-none gap-0.5">
-                            <span className="font-bold text-gray-300">{clientInfo.lang}</span>
+                            <span className={`font-bold ${isDark ? 'text-gray-300' : 'text-slate-700'}`}>
+                                {clientInfo.lang}
+                            </span>
                             <span className="text-[9px] opacity-60">AUTO-DETECTED</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* 최근 5회 점수 대시보드 */}
-            <div className="bg-gray-900/40 p-8 rounded-[2rem] border border-gray-800 backdrop-blur-sm">
-                <h3 className="text-lg font-bold mb-8 flex items-center gap-2">
+            {/* 최근 5회 점수 대시보드 (Chart) */}
+            <div className={`p-8 rounded-[2rem] border transition-all duration-300
+                ${isDark
+                    ? 'bg-gray-900/40 border-gray-800 backdrop-blur-sm'
+                    : 'bg-white border-slate-200 shadow-sm'}`}>
+
+                <h3 className={`text-lg font-bold mb-8 flex items-center gap-2 ${isDark ? 'text-white' : 'text-slate-800'}`}>
                     <span className="w-2 h-6 bg-purple-500 rounded-full"></span>
                     Recent 5 Sessions
                 </h3>
 
                 {scores.length > 0 ? (
-                    <div className="h-64 flex items-end justify-between gap-4 px-2">
+                    <div className="h-48 flex items-end justify-between gap-4 px-2">
                         {scores.map((s, i) => {
-                            const heightPercent = Math.min((s.score / 500) * 100, 100);
+                            // Scale score to max 3000 (roughly lv 6 max)
+                            const heightPercent = Math.min((s.score / 3000) * 100, 100);
 
                             return (
                                 <div key={i} className="flex flex-col items-center flex-1 h-full justify-end group cursor-pointer">
-                                    <span className="mb-3 text-xs font-bold text-white bg-purple-600 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-                                        {s.score} pt
+                                    <span className={`mb-3 text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0
+                                        ${isDark ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-700'}`}>
+                                        {s.score}
                                     </span>
 
                                     <div
-                                        className="w-full max-w-[60px] bg-gradient-to-t from-gray-800 to-purple-500 rounded-t-xl transition-all duration-700 hover:to-purple-400 relative overflow-hidden"
-                                        style={{ height: `${heightPercent}%`, minHeight: '4px' }}
+                                        className={`w-full max-w-[50px] rounded-t-xl transition-all duration-700 relative overflow-hidden
+                                            ${isDark ? 'bg-gray-800' : 'bg-slate-100'}`}
+                                        style={{ height: `${heightPercent}%`, minHeight: '8px' }}
                                     >
-                                        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-white/20 to-transparent"></div>
+                                        <div className={`absolute bottom-0 w-full transition-all duration-1000
+                                             ${isDark ? 'bg-purple-600' : 'bg-purple-500'}`}
+                                            style={{ height: '100%' }}
+                                        />
                                     </div>
 
-                                    <span className="mt-3 text-[10px] text-gray-500 font-mono">
+                                    <span className={`mt-3 text-[10px] font-mono tracking-tighter
+                                        ${isDark ? 'text-gray-500' : 'text-slate-400'}`}>
                                         {new Date(s.created_at).toLocaleDateString(undefined, { month: 'numeric', day: 'numeric' })}
                                     </span>
                                 </div>
@@ -134,23 +161,27 @@ export default function Account({ userSession, onNavigate }) {
                         })}
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center justify-center py-16 border-2 border-dashed border-gray-800 rounded-2xl">
+                    <div className={`flex flex-col items-center justify-center py-16 border-2 border-dashed rounded-2xl
+                        ${isDark ? 'border-gray-800 text-gray-500' : 'border-slate-200 text-slate-400'}`}>
                         <span className="text-4xl mb-4 opacity-50">🎲</span>
-                        <p className="text-gray-400 text-center font-medium">플레이 기록이 없습니다.<br />마당으로 진격하십시오!</p>
+                        <p className="font-medium text-center">No records found.<br />Start your journey!</p>
                     </div>
                 )}
             </div>
 
             {/* 내비게이션 진격 버튼 */}
-            <div className="flex flex-col md:flex-row gap-4 mt-12 mb-20">
+            <div className="flex flex-col md:flex-row gap-4 mt-8 mb-20">
                 <button
                     onClick={() => onNavigate && onNavigate('wordrain')}
-                    className="flex-1 py-4 bg-purple-600 rounded-2xl font-black text-sm tracking-widest hover:bg-purple-500 shadow-lg shadow-purple-900/20 hover:-translate-y-1 transition-all duration-300"
+                    className="flex-1 py-5 rounded-2xl font-black text-sm tracking-widest bg-purple-600 text-white hover:bg-purple-500 shadow-xl shadow-purple-500/20 hover:-translate-y-1 transition-all duration-300"
                 >
-                    놀이마당 (GAME START)
+                    PLAY WORD RAIN
                 </button>
-                <button className="flex-1 py-4 bg-gray-900 rounded-2xl font-black text-sm tracking-widest text-gray-500 border border-gray-800 cursor-not-allowed hover:bg-gray-800 transition-colors">
-                    장터마당 (COMING SOON)
+                <button className={`flex-1 py-5 rounded-2xl font-black text-sm tracking-widest border transition-colors cursor-not-allowed
+                    ${isDark
+                        ? 'bg-gray-900 text-gray-600 border-gray-800'
+                        : 'bg-slate-100 text-slate-400 border-slate-200'}`}>
+                    MARKET (COMING SOON)
                 </button>
             </div>
         </div>
