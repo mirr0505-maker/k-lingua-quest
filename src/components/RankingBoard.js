@@ -1,6 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
+import { translations } from '../constants/languages';
+import { getLocalizedTier } from '../utils/localization';
 
 const emptyMessages = {
     ko: "현재 전장에 등록된 기록이 없습니다. 첫 번째 정복자가 되십시오!",
@@ -10,6 +11,7 @@ const emptyMessages = {
 };
 
 const RankingBoard = ({ language }) => {
+    const t = translations[language] || translations.ko;
     const [activeTab, setActiveTab] = useState(1); // 단계별 필터링
     const [rankings, setRankings] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -41,8 +43,8 @@ const RankingBoard = ({ language }) => {
     return (
         <div className="w-full max-w-5xl mx-auto py-16 animate-in fade-in slide-in-from-bottom-10 duration-1000">
             <div className="text-center mb-12">
-                <h2 className="text-5xl font-black tracking-tighter bg-gradient-to-r from-white via-purple-400 to-white bg-clip-text text-transparent italic">
-                    GLOBAL HALL OF FAME
+                <h2 className="text-3xl font-black tracking-tighter bg-gradient-to-r from-white via-purple-400 to-white bg-clip-text text-transparent italic">
+                    {t.rank_title}
                 </h2>
                 <div className="h-1 w-24 bg-purple-600 mx-auto mt-4 rounded-full shadow-[0_0_20px_rgba(147,51,234,0.5)]"></div>
             </div>
@@ -76,12 +78,15 @@ const RankingBoard = ({ language }) => {
                                 </span>
                                 <div className="text-4xl filter drop-shadow-lg">{getFlag(rank.country_code)}</div>
                                 <div>
-                                    <p className="text-sm text-gray-400 font-bold tracking-widest uppercase mb-1">Commander</p>
+                                    <p className="text-sm text-gray-400 font-bold tracking-widest uppercase mb-1">{t.rank_player}</p>
                                     <h4 className="text-xl font-black text-white">{rank.nickname}</h4>
+                                    <span className="inline-block mt-2 px-3 py-1 bg-purple-600/20 text-purple-400 rounded-full text-[10px] font-bold tracking-wider">
+                                        {getLocalizedTier(rank.level, language)}
+                                    </span>
                                 </div>
                             </div>
                             <div className="text-right">
-                                <p className="text-[10px] text-purple-400 font-black tracking-[0.3em] mb-1">SCORE</p>
+                                <p className="text-[10px] text-purple-400 font-black tracking-[0.3em] mb-1">{t.rank_score}</p>
                                 <p className="text-3xl font-mono font-black text-white tracking-tighter">
                                     {rank.score.toLocaleString()}
                                 </p>

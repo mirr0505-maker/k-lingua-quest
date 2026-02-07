@@ -7,6 +7,25 @@ const AdvancedWordDisplay = ({ word, tier }) => {
     const textColor = 'text-slate-900 dark:text-white';
     const subColor = 'text-slate-500 dark:text-gray-400';
 
+    if (tier === 1) {
+        return (
+            <div
+                className="text-center leading-none transition-all duration-300 relative z-50"
+                style={{
+                    color: '#FFFFFF', // 무조건 순백색
+                    fontWeight: '900',
+                    fontSize: '2.5rem',
+                    textShadow: '0 0 10px rgba(255, 255, 255, 1), 0 0 20px rgba(168, 85, 247, 0.4)', // 자모음의 획을 선명하게 살리는 중앙 집중형 광원
+                    fontFamily: '"Noto Sans KR", sans-serif',
+                    zIndex: 100, // 물방울보다 항상 위에 위치
+                    opacity: 1 // 투명도 간섭 배제
+                }}
+            >
+                {word}
+            </div>
+        );
+    }
+
     if (tier === 2) {
         const firstChar = word.charAt(0);
         const rest = word.slice(1);
@@ -72,9 +91,6 @@ export const WordBubble = ({ word, tier, isMatched }) => {
                 >
                     {/* 2단계 힌트 및 4단계 형용사 처리 로직 포함 */}
                     <AdvancedWordDisplay word={word} tier={tier} />
-
-                    {/* 물방울 상단 반사광 효과 - User Request */}
-                    <div className="absolute top-2 left-4 w-4 h-2 bg-white/30 rounded-full rotate-[-20deg]" />
                 </motion.div>
             ) : null}
         </AnimatePresence>

@@ -5,10 +5,10 @@ import RankingBoard from './RankingBoard';
 const WordRainLobby = ({ language, onStart, unlockedLevel = 1, user }) => {
     const [selectedLevel, setSelectedLevel] = useState(1);
     const [mode, setMode] = useState('hangeul');
-    const [category, setCategory] = useState('General');
+    const [category, setCategory] = useState('K-Food');
 
     // 카테고리 목록
-    const categories = ['General', 'K-Food', 'K-Pop', 'K-Drama'];
+    const categories = ['K-Food'];
 
     // App.js에서 전달받은 language 상태에 따라 즉시 데이터 동기화
     const t = translations[language] || translations.ko;

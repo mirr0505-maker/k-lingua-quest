@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { WordBubble } from './WordItem';
-import { translations } from '../locales/languages';
+import { ScorePopup } from './ScorePopup';
+import { translations } from '../constants/languages';
 import { supabase } from '../supabaseClient';
 import { fetchWordsByCategory } from '../api';
 import { soundManager } from '../utils/SoundManager';
 import { TIER_CONFIG } from '../constants/gameConfig';
 import { getDynamicSpeed } from '../engine/speedController';
+import { saveHighScore } from '../lib/rankingService';
 
 const basicChars = ['ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ', 'ㅈ', 'ㅎ', 'ㅏ', 'ㅑ', 'ㅓ', 'ㅕ', 'ㅗ', 'ㅛ', 'ㅜ', 'ㅠ', 'ㅡ', 'ㅣ'];
 
@@ -86,10 +88,10 @@ const WordRainGame = ({ settings, language, user, onGameOver }) => {
             spawnWord() {
                 // 1. Calculate Tier based on Score
                 const currentScore = this.score;
-                const tierLevel = Object.keys(TIER_CONFIG).find(t =>
+                const tierLevel = Number(Object.keys(TIER_CONFIG).find(t =>
                     currentScore >= TIER_CONFIG[t].scoreRange[0] &&
                     currentScore <= TIER_CONFIG[t].scoreRange[1]
-                ) || 6;
+                ) || 6);
 
 
 
@@ -122,8 +124,8 @@ const WordRainGame = ({ settings, language, user, onGameOver }) => {
                     y: -30,
                     speed: speed,
                     width: ctx.measureText(text).width,
-                    width: ctx.measureText(text).width,
-                    tier: tierLevel, // Store tier for rendering logic
+
+                    tier: settings.level === 1 ? 1 : tierLevel, // Jamo (Lv.1) maintains constant styling regardless of score
                     id: Date.now() + Math.random(), // Unique ID for key
                     isMatched: false,
                     matchedAt: 0
@@ -269,20 +271,13 @@ const WordRainGame = ({ settings, language, user, onGameOver }) => {
                 const userNickname = currentUser.user_metadata?.nickname || currentUser.email.split('@')[0];
                 const countryCode = navigator.language.split('-')[1] || 'US';
 
-                const { error } = await supabase
-                    .from('hangeul_rankings')
-                    .insert([
-                        {
-                            user_id: currentUser.id,
-                            nickname: userNickname,
-                            score: finalScore,
-                            level: userLevel,
-                            country_code: countryCode,
-                            created_at: new Date().toISOString()
-                        }
-                    ]);
+                const { success, error } = await saveHighScore(currentUser.id, finalScore, {
+                    nickname: userNickname,
+                    level: userLevel,
+                    country_code: countryCode
+                });
 
-                if (error) throw error;
+                if (!success) throw new Error(error);
             }
 
             // 2. 부모 컴포넌트에 'account'로 이동 요청
@@ -319,12 +314,8 @@ const WordRainGame = ({ settings, language, user, onGameOver }) => {
                 </div>
             </div>
 
-            {/* Translation Effect Toast */}
-            {toast.show && (
-                <div className="absolute top-24 right-12 z-30 px-6 py-3 bg-yellow-400 text-black font-black rounded-xl shadow-lg animate-in fade-in slide-in-from-right-4 transition-all duration-300">
-                    {toast.text}
-                </div>
-            )}
+            {/* Translation Effect Toast -> Replaced by ScorePopup */}
+            <ScorePopup score={10} isVisible={toast.show} />
 
             {/* Result Modal (User Request Design) */}
             {gameOverState && (

@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
-import { translations } from './locales/languages';
+import NewHeroSection from './components/NewHeroSection';
+import { translations } from './constants/languages';
 import WordRainLobby from './components/WordRainLobby';
 import WordRainGame from './components/WordRainGame';
 import Login from './components/Login';
 import Account from './components/Account';
 import { supabase } from './supabaseClient';
 import RankingBoard from './components/RankingBoard';
-import LiveTicker from './components/LiveTicker';
-import GlassCard from './components/GlassCard';
+import LiveTicker from './components/Navbar/LiveTicker';
 import { useTheme } from './context/ThemeContext';
 
 function App() {
   const { isDark } = useTheme();
   const [showIntro, setShowIntro] = useState(true);
   const [currentMenu, setCurrentMenu] = useState('home');
-  const [language, setLanguage] = useState(localStorage.getItem('selectedLang') || 'ko');
+  const [language, setLanguage] = useState(localStorage.getItem('selectedLang') || 'en');
 
   useEffect(() => {
     localStorage.setItem('selectedLang', language);
@@ -27,18 +27,30 @@ function App() {
   const [user, setUser] = useState(null); // 로그인 유저 정보
 
   useEffect(() => {
-    // 3.5초간 인트로 노출 후 메인으로 진입
-    const timer = setTimeout(() => setShowIntro(false), 3500);
-    return () => clearTimeout(timer);
-  }, []);
+    const initializeApp = async () => {
+      try {
+        // 1. 최소 1초 대기를 위한 프로미스 (인트로 유지 시간 보장)
+        const timerPromise = new Promise((resolve) => setTimeout(resolve, 1000));
 
-  useEffect(() => {
-    // 1. 현재 세션 확인
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
+        // 2. 실제 데이터 로딩 프로미스 (세션 확인)
+        const sessionPromise = supabase.auth.getSession().then(({ data: { session } }) => {
+          setUser(session?.user ?? null);
+          return session;
+        });
 
-    // 2. 인증 상태 변경 감지
+        // 두 작업이 모두 끝날 때까지 대기
+        await Promise.all([timerPromise, sessionPromise]);
+      } catch (error) {
+        console.error("초기화 중 오류 발생:", error);
+      } finally {
+        // 최소 1초 후 로딩(인트로) 해제
+        setShowIntro(false);
+      }
+    };
+
+    initializeApp();
+
+    // 인증 상태 변경 감지 (구독 유지)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) setShowAuth(false); // 로그인 성공 시 모달 닫기
@@ -79,9 +91,8 @@ function App() {
         onAuthClick={() => setShowAuth(true)}
       />
 
-      {/* 내비바 바로 아래 전광판 배치 */}
       <div className="fixed top-[100px] w-full z-40">
-        <LiveTicker />
+        <LiveTicker lang={language} />
       </div>
 
       {/* 인증 모달 레이어 */}
@@ -101,33 +112,13 @@ function App() {
 
       <main className="pt-48 max-w-7xl mx-auto px-10 min-h-screen">
         {currentMenu === 'home' && (
-          <section className="animate-in fade-in slide-in-from-bottom-8 duration-1000">
+          <div className="animate-in fade-in slide-in-from-bottom-8 duration-1000">
             {/* 하이엔드 히어로 섹션 */}
-            <div className="relative h-[420px] rounded-[3rem] overflow-hidden mb-16 border border-white/5 bg-[#0a0a0a] shadow-2xl">
-              <div className="absolute inset-0 flex flex-col justify-center px-24 z-10">
-                <h2 className="text-5xl font-black mb-6 tracking-tighter leading-[1.1]">
-                  {t.heroTitle}<br />
-                  <span className="text-purple-500">{t.heroSub}</span>
-                </h2>
-                <p className="text-base text-gray-400 font-light italic leading-relaxed max-w-2xl tracking-wide opacity-90">
-                  {t.heroDesc}
-                </p>
-              </div>
-              {/* 장식용 그라데이션 - 치우침 방지 시각적 무게중심 */}
-              <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-purple-900/10 to-transparent" />
-            </div>
+            <NewHeroSection lang={language} />
 
-            {/* 3대 퀘스트 카드 섹션 */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 pb-32">
-              {t.cards?.map((card, i) => (
-                <GlassCard key={i} isDark={isDark}>
-                  <div className="w-12 h-0.5 bg-purple-600 mb-10 transition-all duration-500" />
-                  <h3 className="text-2xl font-bold mb-5 tracking-tight">{card.t}</h3>
-                  <p className="opacity-80 text-sm leading-relaxed font-light">{card.d}</p>
-                </GlassCard>
-              ))}
-            </div>
-          </section>
+            {/* 3대 퀘스트 카드 섹션 제거됨 */}
+            {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-10 pb-32"> ... </div> */}
+          </div>
         )}
 
         {currentMenu === 'auth' && (

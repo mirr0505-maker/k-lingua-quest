@@ -46,24 +46,26 @@
         /* 보조 텍스트 (Slate 600 수준) */
     }
 
-    /* 물방울(Bubble) UI 엔진 */
+    /* 물방울 시각 효과 강화 CSS */
     .k-bubble {
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        backdrop-filter: blur(4px);
+        backdrop-filter: blur(2px);
         transition: all 0.3s ease;
-        box-shadow: inset -5px -5px 15px rgba(255, 255, 255, 0.1),
-            inset 5px 5px 15px rgba(0, 0, 0, 0.1);
+        background: radial-gradient(circle, rgba(147, 51, 234, 0.6) 0%, rgba(0, 0, 0, 0.2) 100%);
+        border: 2px solid rgba(168, 85, 247, 1);
+        /* 네온 보라 테두리 강화 */
+        box-shadow: inset 0 0 15px rgba(168, 85, 247, 0.6), 0 0 20px rgba(0, 0, 0, 0.5);
     }
 
     /* 테마별 디테일: 다크 모드 */
     /* .dark 클래스가 상위 요소(html 등)에 있을 때 적용 */
     :global(.dark) .k-bubble {
-        background: rgba(168, 85, 247, 0.15);
-        /* 보라색 빛 */
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(168, 85, 247, 0.3);
+        /* 보라색 빛 강화 */
+        border: 2px solid rgba(168, 85, 247, 1);
     }
 
     /* 테마별 디테일: 라이트 모드 (dark 클래스가 없을 때) */
